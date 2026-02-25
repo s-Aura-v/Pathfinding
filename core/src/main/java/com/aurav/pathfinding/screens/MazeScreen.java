@@ -3,6 +3,7 @@ package com.aurav.pathfinding.screens;
 import com.aurav.pathfinding.BaseGame;
 import com.aurav.pathfinding.entities.Tile;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -11,11 +12,15 @@ import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.BatchTiledMapRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+
+import static com.aurav.pathfinding.utility.FileInput.readInput;
 
 public class MazeScreen extends BaseScreen {
     Map map = new Map();
     Array<Tile> tiles;
+    Camera cam;
 
     int[][] tilesList;
 
@@ -30,13 +35,25 @@ public class MazeScreen extends BaseScreen {
 
     public MazeScreen() {
         tiles = new Array<>();
+        cam = getCamera();
         for (short i = 0; i < 100; i++) {
             for (short j = 0; j < 100; j++) {
                 tiles.add(new Tile(i, j, (short) 1));
             }
         }
-        scale = 1000/100;
+        scale = 1000 / 100;
         System.out.println("Created list");
+        readInput("myfile.txt");
+    }
+
+
+    @Override
+    public boolean touchDragged(int xPos, int yPos, int pointer) {
+        System.out.println("dragged detected");
+        System.out.println("X: " + cam.position.x + ", Y: " + cam.position.y + ", " + pointer);
+        cam.lookAt(cam.position.x + xPos, cam.position.y + yPos, pointer);
+
+        return true;
     }
 
     void createList() {
@@ -46,6 +63,7 @@ public class MazeScreen extends BaseScreen {
     @Override
     public void render(float dt) {
         super.render(dt);
+        cam.update();
         batch.begin();
         for (Tile t : tiles) {
             int posX = t.getPosX() * scale;

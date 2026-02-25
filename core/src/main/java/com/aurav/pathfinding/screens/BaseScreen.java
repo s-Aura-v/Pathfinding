@@ -2,6 +2,7 @@ package com.aurav.pathfinding.screens;
 
 import com.aurav.pathfinding.Pathfinder;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
@@ -37,8 +38,22 @@ public abstract class BaseScreen implements Screen, InputProcessor {
         uiTable.setTouchable(uiStage.getRoot().getTouchable());
     }
 
+    public Camera getCamera() {
+        return camera;
+    }
+
     @Override
     public void show() {
+        InputMultiplexer im = (InputMultiplexer) Gdx.input.getInputProcessor();
+        im.addProcessor(this);
+        im.addProcessor(uiStage);
+    }
+
+    @Override
+    public void hide() {
+        InputMultiplexer im = (InputMultiplexer) Gdx.input.getInputProcessor();
+        im.removeProcessor(this);
+        im.removeProcessor(uiStage);
     }
 
     @Override
@@ -61,11 +76,6 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
 
     }
 
