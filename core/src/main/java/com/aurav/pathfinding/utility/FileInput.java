@@ -8,13 +8,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class FileInput {
 
-    public static void readInput(String path) {
+    public static int[][] readInput(String path) {
         path = "assets/inputs/input1";
 
-        int[][] tempTiles = new int[10000][10000]; // what if idk the row and column size...
+        HashMap<Integer, Integer> teleporterIndex = new HashMap();
+        int[][] tempTiles = new int[10000][10000]; // using max possible size
         int rowIndex = 0;
         int column = 0;
 
@@ -31,7 +33,11 @@ public class FileInput {
                         if (rowLine[columnIndex].equals("F")) {
                             tempTiles[rowIndex][columnIndex] = 10;
                         } else if (rowLine[columnIndex].charAt(0) == 'T') {
+                            // If it's a teleporter, let's save the teleporter index and coordinates;
+                            // TODO: Teleporter incomplete for now...
                             tempTiles[rowIndex][columnIndex] = 11;
+                            int index = Integer.parseInt(rowLine[columnIndex].substring(1));
+//                            System.out.println(teleIndex);
                         }
                     }
                 }
@@ -51,5 +57,6 @@ public class FileInput {
         System.out.println(tiles.length + " by " + tiles[0].length);
 
         System.out.println(Arrays.deepToString(tiles));
+        return tiles;
     }
 }

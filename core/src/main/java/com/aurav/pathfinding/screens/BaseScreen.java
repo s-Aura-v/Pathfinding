@@ -36,7 +36,14 @@ public abstract class BaseScreen implements Screen, InputProcessor {
         uiTable = new Table();
         uiStage.addActor(uiTable);
         uiTable.setTouchable(uiStage.getRoot().getTouchable());
+
+        uiTable.setFillParent(true);
+        uiTable.center();
     }
+
+    public abstract void initialize();
+
+    public abstract void update(float dt);
 
     public Camera getCamera() {
         return camera;
@@ -60,6 +67,8 @@ public abstract class BaseScreen implements Screen, InputProcessor {
     public void render(float dt) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        uiStage.act(dt);
+        uiStage.draw();
     }
 
     @Override

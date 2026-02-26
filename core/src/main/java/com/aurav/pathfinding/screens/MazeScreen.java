@@ -19,31 +19,33 @@ import static com.aurav.pathfinding.utility.FileInput.readInput;
 
 public class MazeScreen extends BaseScreen {
     Map map = new Map();
-    Array<Tile> tiles;
+    Array<Tile> tilesRender;
     Camera cam;
-
-    int[][] tilesList;
 
     int start;
     int scale;
     int destination;
     int layover;
 
-    // go through the teleporters,
-    // find a straightforward path
-    //
-
     public MazeScreen() {
-        tiles = new Array<>();
+        tilesRender = new Array<>();
         cam = getCamera();
         for (short i = 0; i < 100; i++) {
             for (short j = 0; j < 100; j++) {
-                tiles.add(new Tile(i, j, (short) 1));
+                tilesRender.add(new Tile(i, j, (short) 1));
             }
         }
         scale = 1000 / 100;
-        System.out.println("Created list");
-        readInput("myfile.txt");
+    }
+
+    @Override
+    public void initialize() {
+
+    }
+
+    @Override
+    public void update(float dt) {
+
     }
 
 
@@ -65,7 +67,7 @@ public class MazeScreen extends BaseScreen {
         super.render(dt);
         cam.update();
         batch.begin();
-        for (Tile t : tiles) {
+        for (Tile t : tilesRender) {
             int posX = t.getPosX() * scale;
             int posY = t.getPosY() * scale;
             batch.draw(t.getTexture(), posX, posY);
