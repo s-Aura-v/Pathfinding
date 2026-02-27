@@ -1,13 +1,17 @@
 package com.aurav.pathfinding.utility;
 
+import com.aurav.pathfinding.entities.Node;
+
+import java.util.*;
+
 import static com.aurav.pathfinding.utility.FileInput.readInput;
 
 public class SearchAlgorithm {
     enum Direction {
-        NORTH(0, 1),
-        SOUTH(0, -1),
-        EAST(1, 0),
-        WEST(-1, 0);
+        NORTH(0, -1),
+        SOUTH(0, 1),
+        EAST(-1, 0),
+        WEST(1, 0);
 
         private int deltaX;
         private int deltaY;
@@ -20,14 +24,20 @@ public class SearchAlgorithm {
     }
 
     public static void main(String[] args) {
-        int[][] map = readInput("assets/inputs/input1");
-        search(map, 0, 0, 1, 2);
+        int[][] map = readInput("assets/inputs/input3");
+        System.gc();
+        search(map, 0, 0, 5, 5);
     }
 
     /**
+     * CURRENTLY BROKEN FOR LARGE INPUTS; FOR SOME REASOn, READINPUT IS NOT CLEARING ITS MEMORY...
+     * AND PARENT IS BROKEN AND MAYBE THE COST CALCULATION TOO...
+     * <p>
      * Given a source and destination, attempts to find the best path.
      * Uses a combination of Dijkstra's and A*
      * <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Manhattan Distance for A* Heuristic</a>
+     * <a href="https://www.redblobgames.com/pathfinding/a-star/introduction.html">Algorithm Overview</a>
+     * <a href="https://github.com/riscy/a_star_on_grids">More on A*</a>
      *
      * @param xSource the x position of the source cell
      * @param ySource the y position of the source cell
@@ -35,55 +45,57 @@ public class SearchAlgorithm {
      * @param yDest   the y position of the destination cell
      */
     public static void search(int[][] map, int xSource, int ySource, int xDest, int yDest) {
-        int xCurrent = xSource;
-        int yCurrent = ySource;
+        // A* Setup
+        PriorityQueue<Node> open = new PriorityQueue<>(new Comparator<Node>() {
+            @Override
+            public int compare(Node o1, Node o2) {
+                return Integer.compare(o1.cost, o2.cost);
+            }
+        });
+        Set<char[]> closed = new HashSet<>(); // can I use another data type for this comparison because String takes too much memory...
 
-        int distToSource = 0;
-        int distToDest = 0;
+        Node startNode = new Node(xSource, ySource, 0);
+        open.offer(startNode);
 
-        boolean destFound = false;
-        while (!destFound) {
-            int bestCost = Integer.MAX_VALUE;
+        while (!open.isEmpty()) {
+            Node current = open.poll();
+            if (current.xCoordinates == xDest && current.yCoordinates == yDest) {
+                System.out.println(Arrays.toString(current.parent) + " at cost: " + current.cost);
+                break;
+            }
 
-            // Step 1: Find the best neighbor
-            int bestNeighborX = 0;
-            int bestNeighborY = 0;
+            String k = current.xCoordinates + "," + current.yCoordinates;
+            char[] key = k.toCharArray();
+            if (closed.contains(key)) continue;
+            closed.add(key);
+
+            // Explore neighbors
             for (Direction dir : Direction.values()) {
                 try {
-                    int xNeighbor = xCurrent + dir.deltaX;
-                    int yNeighbor = yCurrent + dir.deltaY;
+                    int xNeighbor = current.xCoordinates + dir.deltaX;
+                    int yNeighbor = current.yCoordinates + dir.deltaY;
+                    int distToDest = Math.abs(xDest - xNeighbor) + Math.abs(yDest - yNeighbor);
+                    int distToSource = Math.abs(xNeighbor - xSource) + Math.abs(yNeighbor - ySource);
 
-                    distToDest = Math.abs(xDest - xNeighbor) + Math.abs(yDest - yNeighbor);
-                    distToSource = Math.abs(xNeighbor - xSource) + Math.abs(yNeighbor - ySource);
+                    // Since the nodes have individual weights, use the lowest weight.
+                    // Assumes the user is smart
+                    int weight = Math.min(
+                        map[current.xCoordinates][current.yCoordinates],
+                        map[xNeighbor][yNeighbor]);
+                    int newCost = current.cost + (weight * (distToDest + distToSource)); // i feel like this is off
+                    // the website isn't helping a lot so  look it up later...
 
-                    // To fix the two node error, we'll just use the lowest weight.
-                    // It's a game bruh, it's about what feels good, not what is good.
-                    int weight = map[xNeighbor][yNeighbor];
-                    if (map[xCurrent][yCurrent] < weight) {
-                        weight = map[xCurrent][yCurrent];
-                    }
+                    Node neighbor = new Node(xNeighbor, yNeighbor, newCost);
+                    current.parent = new int[]{xNeighbor, yNeighbor};
+                    open.offer(neighbor);
 
-                    int cost = weight * distToDest * distToSource;
-
-                    if (cost < bestCost) {
-                        bestCost = cost;
-                        bestNeighborX = xCurrent;
-                        bestNeighborY = yCurrent;
-                    }
                 } catch (ArrayIndexOutOfBoundsException ignored) {
                 }
             }
-
-            // Step 2: See if it's the edge
-            if (xCurrent == xDest && yCurrent == yDest) destFound = true;
-
-            // Step 3: Move to the best neighbor
-            xCurrent = bestNeighborX;
-            yCurrent = bestNeighborY;
         }
 
-        System.out.println(distToDest);
     }
+
 
     /**
      * Compares the weight of source and destination, then returns the lower of the two.

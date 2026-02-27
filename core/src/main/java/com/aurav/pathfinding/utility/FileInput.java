@@ -1,20 +1,12 @@
 package com.aurav.pathfinding.utility;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class FileInput {
 
     public static int[][] readInput(String path) {
-        path = "assets/inputs/input1";
-
         HashMap<Integer, Integer> teleporterIndex = new HashMap();
         int[][] tempTiles = new int[10000][10000]; // using max possible size
         int rowIndex = 0;
@@ -49,14 +41,13 @@ public class FileInput {
         }
 
 //        // Optimization:
-        // Then we cut that array down to the proper size; to save memory.
+        // Then we cut that array down to its true size; to save memory.
         int[][] tiles = new int[rowIndex][column];
         for (int i = 0; i < rowIndex; i++) {
             System.arraycopy(tempTiles[i], 0, tiles[i], 0, column);
         }
-        System.out.println(tiles.length + " by " + tiles[0].length);
 
-        System.out.println(Arrays.deepToString(tiles));
+        System.out.println(tiles.length + " by " + tiles[0].length);
         return tiles;
     }
 }
