@@ -1,28 +1,23 @@
 package com.aurav.pathfinding.screens;
 
-import com.aurav.pathfinding.Pathfinder;
+import com.aurav.pathfinding.utility.Config;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.TouchableAction;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public abstract class BaseScreen implements Screen, InputProcessor {
-    private Viewport viewport;
-    private Camera camera;
+    Viewport levelViewport;
+    private OrthographicCamera camera;
     public SpriteBatch batch;
-
-    static final int WORLD_WIDTH = 1000;
-    static final int WORLD_HEIGHT = 1000;
 
     protected Stage uiStage;
     protected Table uiTable;
@@ -30,22 +25,24 @@ public abstract class BaseScreen implements Screen, InputProcessor {
     public BaseScreen() {
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
-        viewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+        levelViewport = new FitViewport(Config.WORLD_WIDTH, Config.WORLD_HEIGHT, camera);
 
-        uiStage = new Stage();
+        uiStage = new Stage(levelViewport, batch);
         uiTable = new Table();
         uiStage.addActor(uiTable);
         uiTable.setTouchable(uiStage.getRoot().getTouchable());
 
         uiTable.setFillParent(true);
         uiTable.center();
+
+        initialize();
     }
 
     public abstract void initialize();
 
     public abstract void update(float dt);
 
-    public Camera getCamera() {
+    public OrthographicCamera getCamera() {
         return camera;
     }
 
@@ -73,9 +70,9 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height);
+        levelViewport.update(width, height);
         camera.update();
-        viewport.apply();
+        levelViewport.apply();
     }
 
     @Override

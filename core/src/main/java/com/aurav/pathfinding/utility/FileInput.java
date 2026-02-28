@@ -1,6 +1,4 @@
 package com.aurav.pathfinding.utility;
-
-
 import java.io.*;
 import java.util.HashMap;
 
@@ -40,7 +38,7 @@ public class FileInput {
             throw new RuntimeException(e);
         }
 
-//        // Optimization:
+        // Optimization:
         // Then we cut that array down to its true size; to save memory.
         int[][] tiles = new int[rowIndex][column];
         for (int i = 0; i < rowIndex; i++) {

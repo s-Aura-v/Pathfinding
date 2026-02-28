@@ -1,77 +1,90 @@
 package com.aurav.pathfinding.screens;
 
-import com.aurav.pathfinding.BaseGame;
-import com.aurav.pathfinding.entities.Tile;
+import com.aurav.pathfinding.utility.Config;
+import com.aurav.pathfinding.utility.FileInput;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.Map;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapRenderer;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.renderers.BatchTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-
-import static com.aurav.pathfinding.utility.FileInput.readInput;
 
 public class MazeScreen extends BaseScreen {
     Map map = new Map();
-    Array<Tile> tilesRender;
-    Camera cam;
+    Texture tileTexture = new Texture("maps/tile.png");
+    int scaleX;
+    int scaleY;
+    int[][] tiles;
 
-    int start;
-    int scale;
-    int destination;
-    int layover;
-
-    public MazeScreen() {
-        tilesRender = new Array<>();
-        cam = getCamera();
-        for (short i = 0; i < 100; i++) {
-            for (short j = 0; j < 100; j++) {
-                tilesRender.add(new Tile(i, j, (short) 1));
-            }
-        }
-        scale = 1000 / 100;
-    }
+    // Camera
+    private Vector3 prevCamPos = new Vector3();
+    OrthographicCamera camera;
 
     @Override
     public void initialize() {
+        tiles = FileInput.readInput("assets/inputs/input1");
 
+        camera = getCamera();
+        System.out.println(camera.position);
+        scaleX = (Config.WORLD_WIDTH / tiles.length);
+        scaleY = (Config.WORLD_HEIGHT) / tiles[0].length;
     }
 
     @Override
     public void update(float dt) {
-
     }
 
-
+    /**
+     * Just store the camera's position when dragged.
+     * Used to calculate camera translation
+     */
     @Override
-    public boolean touchDragged(int xPos, int yPos, int pointer) {
-        System.out.println("dragged detected");
-        System.out.println("X: " + cam.position.x + ", Y: " + cam.position.y + ", " + pointer);
-        cam.lookAt(cam.position.x + xPos, cam.position.y + yPos, pointer);
-
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        prevCamPos.set(screenX, screenY, 0);
         return true;
     }
 
-    void createList() {
-//        tilesList = new int[][];
+    /**
+     * Calculate the camera translation using previous position and new position.
+     */
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        // Previous Position - Change in Position = new Position
+        float x = (prevCamPos.x - screenX);
+        float y = (screenY - prevCamPos.y);
+
+        camera.translate(x, y);
+        camera.update();
+        bindCamera();
+
+        prevCamPos.set(screenX, screenY, 0);
+        return true;
     }
+
 
     @Override
     public void render(float dt) {
         super.render(dt);
-        cam.update();
+        float tileSize = 24f;
+
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        for (Tile t : tilesRender) {
-            int posX = t.getPosX() * scale;
-            int posY = t.getPosY() * scale;
-            batch.draw(t.getTexture(), posX, posY);
+        for (int x = 0; x <= tiles[0].length; x++) {
+            for (int y = 0; y <= tiles.length; y++) {
+                batch.draw(tileTexture, x * tileSize, y * tileSize, tileSize, tileSize);
+            }
         }
         batch.end();
+    }
+
+
+    private void bindCamera() {
+        camera.position.x = MathUtils.clamp(camera.position.x,
+            0,
+            tiles[0].length + camera.viewportWidth);
+        camera.position.y = MathUtils.clamp(camera.position.y,
+            0,
+            tiles.length + camera.viewportHeight);
     }
 }
