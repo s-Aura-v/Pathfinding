@@ -24,6 +24,7 @@ public class StartScreen extends BaseScreen {
         uiTable.row();
         uiTable.add(quitButton).colspan(2);
 
+
         // Listeners; (in reference to IM)
         startButton.addListener(e -> {
             if (!(e instanceof InputEvent) || !(((InputEvent) e).getType().equals(InputEvent.Type.touchDown))) {
@@ -50,5 +51,8 @@ public class StartScreen extends BaseScreen {
     @Override
     public void render(float dt) {
         super.render(dt);
+        uiStage.act(dt);
+        uiStage.draw();
+
     }
 }

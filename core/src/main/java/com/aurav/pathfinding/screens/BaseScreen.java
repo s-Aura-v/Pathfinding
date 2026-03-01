@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 public abstract class BaseScreen implements Screen, InputProcessor {
     Viewport levelViewport;
+    Viewport uiViewport; // this is important so that we can keep the UI camera static.
     private OrthographicCamera camera;
     public SpriteBatch batch;
 
@@ -26,14 +27,13 @@ public abstract class BaseScreen implements Screen, InputProcessor {
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
         levelViewport = new FitViewport(Config.WORLD_WIDTH, Config.WORLD_HEIGHT, camera);
+        uiViewport = new FitViewport(Config.WORLD_WIDTH, Config.WORLD_HEIGHT); // no camera because static.
 
-        uiStage = new Stage(levelViewport, batch);
+        uiStage = new Stage(uiViewport, batch);
         uiTable = new Table();
         uiStage.addActor(uiTable);
         uiTable.setTouchable(uiStage.getRoot().getTouchable());
-
         uiTable.setFillParent(true);
-        uiTable.center();
 
         initialize();
     }
@@ -49,30 +49,27 @@ public abstract class BaseScreen implements Screen, InputProcessor {
     @Override
     public void show() {
         InputMultiplexer im = (InputMultiplexer) Gdx.input.getInputProcessor();
-        im.addProcessor(this);
         im.addProcessor(uiStage);
+        im.addProcessor(this);
     }
 
     @Override
     public void hide() {
         InputMultiplexer im = (InputMultiplexer) Gdx.input.getInputProcessor();
-        im.removeProcessor(this);
         im.removeProcessor(uiStage);
+        im.removeProcessor(this);
     }
 
     @Override
     public void render(float dt) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        uiStage.act(dt);
-        uiStage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
         levelViewport.update(width, height);
-        camera.update();
-        levelViewport.apply();
+        uiViewport.update(width, height, false);
     }
 
     @Override

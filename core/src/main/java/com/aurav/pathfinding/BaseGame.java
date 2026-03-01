@@ -76,7 +76,8 @@ public class BaseGame extends Game {
         BitmapFont customFont = fontGenerator.generateFont(fontParameter);
         labelStyle.font = customFont;
 
-        fontParameter.size = 24;
+        fontParameter.size = 12;
+        fontParameter.color = Color.PINK;
         customFont = fontGenerator.generateFont(fontParameter);
         levelLabelStyle.font = customFont;
 
