@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.Map;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
@@ -45,8 +46,13 @@ public class MazeScreen extends BaseScreen {
         return true;
     }
 
+
     /**
      * Calculate the camera translation using previous position and new position.
+     *
+     * @param screenX the new x position
+     * @param screenY the new y position
+     * @param pointer lol idk
      */
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
@@ -62,29 +68,33 @@ public class MazeScreen extends BaseScreen {
         return true;
     }
 
+    float tileSize = 24;
 
     @Override
     public void render(float dt) {
         super.render(dt);
-        float tileSize = 24f;
+
+        int bottomLeftX = (int) Math.max(0, ((camera.position.x - (camera.viewportWidth)) / tileSize));
+        int bottomLeftY = (int) Math.max(0, ((camera.position.y - (camera.viewportHeight)) / tileSize));
+        int topRightX = (int) Math.min(tiles[0].length - 1, ((camera.position.x + (camera.viewportWidth)) / tileSize));
+        int topRightY = (int) Math.min(tiles.length - 1, ((camera.position.y + (camera.viewportHeight)) / tileSize));
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        for (int x = 0; x <= tiles[0].length; x++) {
-            for (int y = 0; y <= tiles.length; y++) {
+        for (int x = bottomLeftX; x <= topRightX; x++) {
+            for (int y = bottomLeftY; y <= topRightY; y++) {
                 batch.draw(tileTexture, x * tileSize, y * tileSize, tileSize, tileSize);
             }
         }
         batch.end();
     }
 
-
     private void bindCamera() {
         camera.position.x = MathUtils.clamp(camera.position.x,
             0,
-            tiles[0].length + camera.viewportWidth);
+            tiles[0].length * tileSize + (camera.viewportWidth / 2));
         camera.position.y = MathUtils.clamp(camera.position.y,
             0,
-            tiles.length + camera.viewportHeight);
+            tiles.length * tileSize + (camera.viewportHeight / 2));
     }
 }
