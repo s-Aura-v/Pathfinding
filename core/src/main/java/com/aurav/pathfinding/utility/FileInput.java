@@ -1,10 +1,16 @@
 package com.aurav.pathfinding.utility;
+
 import java.io.*;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class FileInput {
 
-    public static int[][] readInput(String path) {
+    public FileInput() {
+
+    }
+
+    public int[][] readInput(String path) {
         HashMap<Integer, Integer> teleporterIndex = new HashMap();
         int[][] tempTiles = new int[10000][10000]; // using max possible size
         int rowIndex = 0;
@@ -33,6 +39,7 @@ public class FileInput {
                 }
                 rowIndex++;
                 column = rowLine.length;
+                rowLine = null;
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

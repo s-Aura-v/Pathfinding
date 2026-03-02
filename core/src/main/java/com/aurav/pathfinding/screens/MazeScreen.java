@@ -24,8 +24,6 @@ import java.util.Arrays;
 
 public class MazeScreen extends BaseScreen {
     Texture tileTexture = new Texture("maps/tile.png");
-    int scaleX;
-    int scaleY;
     int[][] tiles;
 
     // Camera
@@ -39,17 +37,14 @@ public class MazeScreen extends BaseScreen {
 
     @Override
     public void initialize() {
-        tiles = FileInput.readInput("assets/inputs/input3");
+        FileInput fi = new FileInput();
+        tiles = fi.readInput("assets/inputs/input3");
 
         source = new int[2];
         destination = new int[2];
 
         camera = getCamera();
-        scaleX = (Config.WORLD_WIDTH / tiles.length);
-        scaleY = (Config.WORLD_HEIGHT) / tiles[0].length;
-
         initUI();
-
     }
 
     /**
@@ -120,6 +115,12 @@ public class MazeScreen extends BaseScreen {
      * Given the array index, [x][y], handle pathfinding inputs.
      */
     private void handleGrid(int x, int y) {
+        try {
+            if (tiles[x][y] == 10 || tiles[x][y] == 11) return;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return;
+        }
+
         if (start) {
             source[0] = x;
             source[1] = y;
@@ -147,7 +148,7 @@ public class MazeScreen extends BaseScreen {
 
         camera.translate(x, y);
         camera.update();
-        bindCamera();
+//        bindCamera();
 
         prevCamPos.set(screenX, screenY, 0);
         return true;
@@ -161,8 +162,10 @@ public class MazeScreen extends BaseScreen {
 
         int bottomLeftX = (int) Math.max(0, ((camera.position.x - (camera.viewportWidth)) / tileSize));
         int bottomLeftY = (int) Math.max(0, ((camera.position.y - (camera.viewportHeight)) / tileSize));
-        int topRightX = (int) Math.min(tiles[0].length - 1, ((camera.position.x + (camera.viewportWidth)) / tileSize));
-        int topRightY = (int) Math.min(tiles.length - 1, ((camera.position.y + (camera.viewportHeight)) / tileSize));
+
+        /// ????
+        int topRightX = (int) Math.min(tiles.length - 1, ((camera.position.x + (camera.viewportWidth)) / tileSize));
+        int topRightY = (int) Math.min(tiles[0].length - 1, ((camera.position.y + (camera.viewportHeight)) / tileSize));
 
         // Game Render
         camera.update();
@@ -181,9 +184,11 @@ public class MazeScreen extends BaseScreen {
                 int weight = tiles[x][y];
                 switch (weight) {
                     case 10:
-                        batch.setColor(Color.BLACK);
+                        batch.setColor(Color.GRAY);
+                        break;
                     case 11:
                         batch.setColor(Color.CYAN);
+                        break;
                 }
 
                 batch.draw(tileTexture, x * tileSize, y * tileSize, tileSize, tileSize);

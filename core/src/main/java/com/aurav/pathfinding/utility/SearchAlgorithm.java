@@ -4,8 +4,6 @@ import com.aurav.pathfinding.entities.Node;
 
 import java.util.*;
 
-import static com.aurav.pathfinding.utility.FileInput.readInput;
-
 public class SearchAlgorithm {
     enum Direction {
         NORTH(0, -1),
@@ -24,7 +22,8 @@ public class SearchAlgorithm {
     }
 
     public static void main(String[] args) {
-        int[][] map = readInput("assets/inputs/input3");
+        FileInput fs = new FileInput();
+        int[][] map = fs.readInput("assets/inputs/input3");
         System.gc();
         search(map, 0, 0, 5, 5);
     }
@@ -35,9 +34,7 @@ public class SearchAlgorithm {
      * <p>
      * Given a source and destination, attempts to find the best path.
      * Uses a combination of Dijkstra's and A*
-     * <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Manhattan Distance for A* Heuristic</a>
-     * <a href="https://www.redblobgames.com/pathfinding/a-star/introduction.html">Algorithm Overview</a>
-     * <a href="https://github.com/riscy/a_star_on_grids">More on A*</a>
+     * <a href="https://en.wikipedia.org/wiki/A*_search_algorithm">Pseudo Code for A*</a>
      *
      * @param xSource the x position of the source cell
      * @param ySource the y position of the source cell
@@ -49,51 +46,48 @@ public class SearchAlgorithm {
         PriorityQueue<Node> open = new PriorityQueue<>(new Comparator<Node>() {
             @Override
             public int compare(Node o1, Node o2) {
-                return Integer.compare(o1.cost, o2.cost);
+                return Integer.compare(o1.fCost, o2.fCost);
             }
         });
-        Set<char[]> closed = new HashSet<>(); // can I use another data type for this comparison because String takes too much memory...
+        boolean[][] visited = new boolean[map.length][map[0].length];
 
-        Node startNode = new Node(xSource, ySource, 0);
+        Node startNode = new Node(xSource, ySource);
+        startNode.gCost = 0;
         open.offer(startNode);
 
         while (!open.isEmpty()) {
+            // Polling the lowest cost node
             Node current = open.poll();
-            if (current.xCoordinates == xDest && current.yCoordinates == yDest) {
-                System.out.println(Arrays.toString(current.parent) + " at cost: " + current.cost);
+            visited[current.x][current.y] = true;
+            if (current.x == xDest && current.y == yDest) {
+                System.out.println(Arrays.toString(current.parent) + ": " + current.gCost);
                 break;
             }
-
-            String k = current.xCoordinates + "," + current.yCoordinates;
-            char[] key = k.toCharArray();
-            if (closed.contains(key)) continue;
-            closed.add(key);
 
             // Explore neighbors
             for (Direction dir : Direction.values()) {
                 try {
-                    int xNeighbor = current.xCoordinates + dir.deltaX;
-                    int yNeighbor = current.yCoordinates + dir.deltaY;
-                    int distToDest = Math.abs(xDest - xNeighbor) + Math.abs(yDest - yNeighbor);
-                    int distToSource = Math.abs(xNeighbor - xSource) + Math.abs(yNeighbor - ySource);
+                    int xNeighbor = current.x + dir.deltaX;
+                    int yNeighbor = current.y + dir.deltaY;
 
-                    // Since the nodes have individual weights, use the lowest weight.
-                    // Assumes the user is smart
-                    int weight = Math.min(
-                        map[current.xCoordinates][current.yCoordinates],
-                        map[xNeighbor][yNeighbor]);
-                    int newCost = current.cost + (weight * (distToDest + distToSource)); // i feel like this is off
-                    // the website isn't helping a lot so  look it up later...
+                    // Pass Cases:
+                    if (map[xNeighbor][yNeighbor] == 10) continue;
+                    if (visited[xNeighbor][yNeighbor]) continue;
 
-                    Node neighbor = new Node(xNeighbor, yNeighbor, newCost);
-                    current.parent = new int[]{xNeighbor, yNeighbor};
-                    open.offer(neighbor);
+                    Node neighbor = new Node(xNeighbor, yNeighbor);
+                    // gcost = [cost to current npde] + [cost to get to neighbor node]
+                    int gCost = current.gCost + Math.min(map[current.x][current.y], map[xNeighbor][yNeighbor]);
+                    if (gCost < neighbor.gCost) {
+                        neighbor.parent = new int[]{current.x, current.y};
+                        neighbor.gCost = gCost;
+                        neighbor.fCost = gCost + (Math.abs(xDest - xNeighbor) + Math.abs(yDest - yNeighbor));
+                        if (!open.contains(neighbor)) open.add(neighbor);
+                    }
 
                 } catch (ArrayIndexOutOfBoundsException ignored) {
                 }
             }
         }
-
     }
 
 

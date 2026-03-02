@@ -2,13 +2,21 @@ package com.aurav.pathfinding.entities;
 
 public class Node {
     public int[] parent;
-    public int xCoordinates;
-    public int yCoordinates;
-    public int cost;
+    public int x;
+    public int y;
+    public int gCost;
+    public int fCost;
+    public int totalCost;
 
-    public Node(int xCoordinates, int yCoordinates, int cost) {
-        this.xCoordinates = xCoordinates;
-        this.yCoordinates = yCoordinates;
-        this.cost = cost;
+    /**
+     * The node representing the values required for an A* algorithm.
+     *
+     * @param x     the x position coordinate
+     * @param y     the y position coordinate
+     */
+    public Node(int x, int y) {
+        this.x = x;
+        this.y = y;
+        this.gCost = Integer.MAX_VALUE;
     }
 }
