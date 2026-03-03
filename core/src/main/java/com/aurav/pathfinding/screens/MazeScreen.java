@@ -13,10 +13,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Slider;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Array;
 
@@ -54,22 +51,26 @@ public class MazeScreen extends BaseScreen {
     Label destUI;
     Slider speedSlider;
     TextButton searchButton;
+    CheckBox selectNodeBox;
 
     private void initUI() {
         sourceUI = new Label("Initial", BaseGame.levelLabelStyle);
         destUI = new Label("Initial", BaseGame.levelLabelStyle);
-        Slider.SliderStyle style = new Slider.SliderStyle();
-        speedSlider = new Slider(0, 100, 20, false, style);
+        speedSlider = new Slider(1, 10, 1, false, BaseGame.skin);
         searchButton = new TextButton("Search", BaseGame.textButtonStyle);
         Label sourceText = new Label("Source: ", BaseGame.levelLabelStyle);
         Label destinationText = new Label("Destination: ", BaseGame.levelLabelStyle);
+        selectNodeBox = new CheckBox("Select node?", BaseGame.skin);
+        selectNodeBox.setChecked(true);
 
         uiTable.top().left().padTop(20).padLeft(10);
         uiTable.add(sourceText, sourceUI);
         uiTable.row();
         uiTable.add(destinationText, destUI);
         uiTable.row();
-        uiTable.add(speedSlider);
+        uiTable.add(selectNodeBox);
+        uiTable.row();
+        uiTable.add(new Label("Camera Speed :", BaseGame.levelLabelStyle), speedSlider);
         uiTable.row();
         uiTable.add(searchButton).colspan(2);
 
@@ -105,9 +106,11 @@ public class MazeScreen extends BaseScreen {
         prevCamPos.set(screenX, screenY, 0);
 
         // Grid
-        Vector3 worldPos = new Vector3(screenX, screenY, 0);
-        camera.unproject(worldPos);
-        handleGrid((int) (worldPos.x / tileSize), (int) (worldPos.y / tileSize));
+        if (selectNodeBox.isChecked()) {
+            Vector3 worldPos = new Vector3(screenX, screenY, 0);
+            camera.unproject(worldPos);
+            handleGrid((int) (worldPos.x / tileSize), (int) (worldPos.y / tileSize));
+        }
         return true;
     }
 
@@ -146,11 +149,19 @@ public class MazeScreen extends BaseScreen {
         float x = (prevCamPos.x - screenX);
         float y = (screenY - prevCamPos.y);
 
-        camera.translate(x, y);
+        camera.translate(x * speedSlider.getValue(), y * speedSlider.getValue());
         camera.update();
 //        bindCamera();
 
         prevCamPos.set(screenX, screenY, 0);
+        return true;
+    }
+
+    @Override
+    public boolean scrolled(float amountX, float amountY) {
+        camera.zoom += amountY * 0.1f;
+        camera.zoom = MathUtils.clamp(camera.zoom, 0.1f, 5f);
+        camera.update();
         return true;
     }
 
@@ -160,10 +171,8 @@ public class MazeScreen extends BaseScreen {
     public void render(float dt) {
         super.render(dt);
 
-        int bottomLeftX = (int) Math.max(0, ((camera.position.x - (camera.viewportWidth)) / tileSize));
-        int bottomLeftY = (int) Math.max(0, ((camera.position.y - (camera.viewportHeight)) / tileSize));
-
-        /// ????
+        int bottomLeftX = (int) Math.max(0, ((camera.position.x - (camera.viewportWidth * camera.zoom)) / tileSize));
+        int bottomLeftY = (int) Math.max(0, ((camera.position.y - (camera.viewportHeight * camera.zoom)) / tileSize));
         int topRightX = (int) Math.min(tiles.length - 1, ((camera.position.x + (camera.viewportWidth)) / tileSize));
         int topRightY = (int) Math.min(tiles[0].length - 1, ((camera.position.y + (camera.viewportHeight)) / tileSize));
 
@@ -199,6 +208,10 @@ public class MazeScreen extends BaseScreen {
         // UI Render
         uiStage.act(dt);
         uiStage.draw();
+    }
+
+    private void cameraControls() {
+
     }
 
     private void bindCamera() {

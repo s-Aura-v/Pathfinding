@@ -8,12 +8,10 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
@@ -32,6 +30,8 @@ public class BaseGame extends Game {
     public static TextButton.TextButtonStyle textButtonStyle;
     public static TextField.TextFieldStyle textFieldStyle;
 
+    public static Skin skin;
+
     public BaseGame() {
         game = this;
     }
@@ -40,6 +40,12 @@ public class BaseGame extends Game {
     public void create() {
         InputMultiplexer im = new InputMultiplexer();
         Gdx.input.setInputProcessor(im);
+
+        skin = new Skin(
+            Gdx.files.internal("ui/uiskin.json"),
+            new TextureAtlas(Gdx.files.internal("ui/uiskin.atlas"))
+        );
+
         initializeFonts();
     }
 

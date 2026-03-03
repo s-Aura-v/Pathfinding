@@ -4,9 +4,8 @@ public class Node {
     public int[] parent;
     public int x;
     public int y;
-    public int gCost;
-    public int fCost;
-    public int totalCost;
+    public int gCost; // the cost from start to current node
+    public int fCost; // the cost from start to current node + heuristic
 
     /**
      * The node representing the values required for an A* algorithm.
