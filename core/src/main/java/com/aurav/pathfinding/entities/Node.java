@@ -1,7 +1,7 @@
 package com.aurav.pathfinding.entities;
 
 public class Node {
-    public int[] parent;
+    public Node parent;
     public int x;
     public int y;
     public int gCost; // the cost from start to current node

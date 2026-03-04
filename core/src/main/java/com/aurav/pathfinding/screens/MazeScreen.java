@@ -1,21 +1,17 @@
 package com.aurav.pathfinding.screens;
 
 import com.aurav.pathfinding.BaseGame;
-import com.aurav.pathfinding.utility.Config;
+import com.aurav.pathfinding.entities.Node;
 import com.aurav.pathfinding.utility.FileInput;
 import com.aurav.pathfinding.utility.SearchAlgorithm;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.maps.Map;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.Array;
 
 import java.util.Arrays;
 
@@ -32,10 +28,13 @@ public class MazeScreen extends BaseScreen {
     int[] source;
     int[] destination;
 
+    public Node node;
+    public boolean[][] path;
+
     @Override
     public void initialize() {
         FileInput fi = new FileInput();
-        tiles = fi.readInput("assets/inputs/input3");
+        tiles = fi.readInput("assets/inputs/hw2input3");
 
         source = new int[2];
         destination = new int[2];
@@ -51,17 +50,21 @@ public class MazeScreen extends BaseScreen {
     Label destUI;
     Slider speedSlider;
     TextButton searchButton;
+    TextButton resetButton;
     CheckBox selectNodeBox;
+    Label costLabel;
 
     private void initUI() {
-        sourceUI = new Label("Initial", BaseGame.levelLabelStyle);
-        destUI = new Label("Initial", BaseGame.levelLabelStyle);
+        sourceUI = new Label("Initial", BaseGame.skin);
+        destUI = new Label("Initial", BaseGame.skin);
         speedSlider = new Slider(1, 10, 1, false, BaseGame.skin);
-        searchButton = new TextButton("Search", BaseGame.textButtonStyle);
-        Label sourceText = new Label("Source: ", BaseGame.levelLabelStyle);
-        Label destinationText = new Label("Destination: ", BaseGame.levelLabelStyle);
+        searchButton = new TextButton("Search", BaseGame.skin);
+        resetButton = new TextButton("Reset", BaseGame.skin);
+        Label sourceText = new Label("Source: ", BaseGame.skin);
+        Label destinationText = new Label("Destination: ", BaseGame.skin);
         selectNodeBox = new CheckBox("Select node?", BaseGame.skin);
         selectNodeBox.setChecked(true);
+        costLabel = new Label("", BaseGame.skin);
 
         uiTable.top().left().padTop(20).padLeft(10);
         uiTable.add(sourceText, sourceUI);
@@ -70,15 +73,27 @@ public class MazeScreen extends BaseScreen {
         uiTable.row();
         uiTable.add(selectNodeBox);
         uiTable.row();
-        uiTable.add(new Label("Camera Speed :", BaseGame.levelLabelStyle), speedSlider);
+        uiTable.add(new Label("Camera Speed :", BaseGame.skin), speedSlider);
         uiTable.row();
-        uiTable.add(searchButton).colspan(2);
+        uiTable.add(searchButton, resetButton);
+        uiTable.row().row();
+        uiTable.add(new Label("Cost to Dest: ", BaseGame.skin), costLabel);
 
         searchButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
                 System.out.println("Searching from: " + Arrays.toString(source) + ", to: " + Arrays.toString(destination));
-                SearchAlgorithm.search(tiles, source[0], source[1], destination[0], destination[1]);
+                node = SearchAlgorithm.search(tiles, source[0], source[1], destination[0], destination[1]);
+                path = SearchAlgorithm.getPath(node);
+                if (node != null) costLabel.setText(node.gCost);
+                else costLabel.setText("Undefined Path");
+            }
+        });
+
+        resetButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent changeEvent, Actor actor) {
+                node = null;
             }
         });
     }
@@ -184,20 +199,25 @@ public class MazeScreen extends BaseScreen {
             for (int y = bottomLeftY; y <= topRightY; y++) {
                 if (x == source[0] && y == source[1]) {
                     batch.setColor(Color.GREEN);
-                } else if (x == destination[0] && y == destination[1]) {
-                    batch.setColor(Color.RED);
                 } else {
                     batch.setColor(Color.WHITE);
                 }
 
                 int weight = tiles[x][y];
-                switch (weight) {
-                    case 10:
-                        batch.setColor(Color.GRAY);
-                        break;
-                    case 11:
-                        batch.setColor(Color.CYAN);
-                        break;
+                if (weight == 10) {
+                    batch.setColor(Color.GRAY);
+                } else if (weight > 100) {
+                    batch.setColor(Color.CYAN);
+                }
+
+                if (node != null) {
+                    if (path[x][y]) {
+                        batch.setColor(Color.YELLOW);
+                    }
+                }
+
+                if (x == destination[0] && y == destination[1]) {
+                    batch.setColor(Color.RED);
                 }
 
                 batch.draw(tileTexture, x * tileSize, y * tileSize, tileSize, tileSize);

@@ -24,9 +24,12 @@ public class SearchAlgorithm {
 
     public static void main(String[] args) {
         FileInput fs = new FileInput();
-        int[][] map = fs.readInput("assets/inputs/input1");
+        int[][] map = fs.readInput("assets/inputs/hw2input3");
 //        search(map, 0, 0, 9999, 9999);
     }
+
+    static int sizeX;
+    static int sizeY;
 
     /**
      * CURRENTLY BROKEN FOR LARGE INPUTS;
@@ -41,7 +44,7 @@ public class SearchAlgorithm {
      * @param xDest   the x position of the destination cell
      * @param yDest   the y position of the destination cell
      */
-    public static void search(int[][] map, int xSource, int ySource, int xDest, int yDest) {
+    public static Node search(int[][] map, int xSource, int ySource, int xDest, int yDest) {
         PriorityQueue<Node> open = new PriorityQueue<>(new Comparator<Node>() {
             @Override
             public int compare(Node o1, Node o2) {
@@ -59,14 +62,16 @@ public class SearchAlgorithm {
 
         Node bestNode = new Node(0, 0);
 
+        sizeX = map[0].length;
+        sizeY = map.length;
+
         while (!open.isEmpty()) {
             Node current = open.poll();
             visited[current.x][current.y] = true;
 
             if (current.x == xDest && current.y == yDest) {
                 bestNode = current;
-                System.out.println(current.gCost);
-                break;
+                return current;
             }
 
             for (Direction dir : Direction.values()) {
@@ -76,6 +81,16 @@ public class SearchAlgorithm {
 
                     if (map[xNeighbor][yNeighbor] == 10) continue;
                     if (visited[xNeighbor][yNeighbor]) continue;
+                    if (map[xNeighbor][yNeighbor] > 100) {
+                        int[] teleporters = teleportPair.get(map[xNeighbor][yNeighbor]);
+                        if (teleporters[0] == xNeighbor && teleporters[1] == yNeighbor) {
+                            xNeighbor = teleporters[2];
+                            yNeighbor = teleporters[3];
+                        } else {
+                            xNeighbor = teleporters[0];
+                            yNeighbor = teleporters[1];
+                        }
+                    }
 
                     // Pick the lowest cost between the nodes
                     // gCost = [cost to current node] + [cost to get to neighbor node]
@@ -83,7 +98,7 @@ public class SearchAlgorithm {
                     if (gCost < bestGCost[xNeighbor][yNeighbor]) {
                         bestGCost[xNeighbor][yNeighbor] = gCost;
                         Node neighbor = new Node(xNeighbor, yNeighbor);
-                        neighbor.parent = new int[]{current.x, current.y};
+                        neighbor.parent = current;
                         neighbor.gCost = gCost;
                         neighbor.fCost = gCost + (Math.abs(xDest - xNeighbor) + Math.abs(yDest - yNeighbor));
                         open.add(neighbor);
@@ -93,10 +108,11 @@ public class SearchAlgorithm {
             }
         }
 
-        int bestTCost = teleportSearch(xDest, yDest, xSource, ySource, map);
-        if (bestTCost < bestNode.gCost) {
-            // do some wizardly
-        }
+//        int bestTCost = teleportSearch(xDest, yDest, xSource, ySource, map);
+//        if (bestTCost < bestNode.gCost) {
+        // do some wizardly
+//        }
+        return null;
     }
 
     /**
@@ -143,12 +159,18 @@ public class SearchAlgorithm {
         return 0;
     }
 
-//    private static String printPath(int[] parent, boolean[][] visited, String path) {
-//        if (!visited[parent[0]][parent[1]]) return path;
-//        path += Arrays.toString(parent) + " -> " + path;
-//        int[] grandparent = ;
-//        return printPath(parent, visited, path);
-//    }
+    public static boolean[][] getPath(Node n) {
+        boolean[][] path = new boolean[sizeY][sizeX];
+        if (n == null) {
+            return path;
+        }
+        Node current = n;
+        while (current.parent != null) {
+            path[current.x][current.y] = true;
+            current = current.parent;
+        }
+        return path;
+    }
 
 }
 
