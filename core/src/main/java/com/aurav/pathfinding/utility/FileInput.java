@@ -9,18 +9,14 @@ public class FileInput {
 
     public static HashMap<Integer, int[]> teleportPair = new HashMap<>();
 
-    public FileInput() {
-
-    }
-
     /**
      * Teleport Logic:
      * Each teleport has a tag, "T1, T2, ... TN". These teleports are in pairs.
      * If we get the tag #, {1, 2, ...}, then add a 100 for their weight, we can make sure the A* doesn't explore it.
      * AND, we can make sure we can find the pairs from the HashMap.
      */
-    public int[][] readInput(String path) {
-        int[][] tempTiles = new int[10000][10000]; // using max possible size
+    public static int[][] readInput(String path) {
+        int[][] tempTiles = new int[10001][10001]; // using max possible size
         int rowIndex = 0;
         int column = 0;
 

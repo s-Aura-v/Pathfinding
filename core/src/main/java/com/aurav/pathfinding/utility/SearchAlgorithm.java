@@ -24,7 +24,7 @@ public class SearchAlgorithm {
 
     public static void main(String[] args) {
         FileInput fs = new FileInput();
-        int[][] map = fs.readInput("assets/inputs/hw2input3");
+        int[][] map = fs.readInput("assets/inputs/hw2input2");
 //        search(map, 0, 0, 9999, 9999);
     }
 
@@ -60,7 +60,7 @@ public class SearchAlgorithm {
         bestGCost[xSource][ySource] = 0;
         open.offer(startNode);
 
-        Node bestNode = new Node(0, 0);
+        Node bestNode = null;
 
         sizeX = map[0].length;
         sizeY = map.length;
@@ -71,7 +71,8 @@ public class SearchAlgorithm {
 
             if (current.x == xDest && current.y == yDest) {
                 bestNode = current;
-                return current;
+                break;
+//                return current;
             }
 
             for (Direction dir : Direction.values()) {
@@ -108,14 +109,20 @@ public class SearchAlgorithm {
             }
         }
 
+        // If we haven't found the best node, then let's start looking at the teleports exclusively. again
+        if (bestNode == null) {
+//            teleportSearch();
+        }
+
 //        int bestTCost = teleportSearch(xDest, yDest, xSource, ySource, map);
 //        if (bestTCost < bestNode.gCost) {
         // do some wizardly
 //        }
-        return null;
+        return bestNode;
     }
 
     /**
+     * My initial plan for handling teleports, but I've decided against it, because I found an easier solution that works mostly.
      * This method attempts to find the closest teleport to the goal,
      * then see if we can get a shorter path from there.
      * Use the cost for A*, but ignore it for the pathfinding.

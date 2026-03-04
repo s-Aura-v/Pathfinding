@@ -13,7 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
+
+import static com.aurav.pathfinding.utility.FileInput.readInput;
 
 public class MazeScreen extends BaseScreen {
     Texture tileTexture = new Texture("maps/tile.png");
@@ -33,8 +37,8 @@ public class MazeScreen extends BaseScreen {
 
     @Override
     public void initialize() {
-        FileInput fi = new FileInput();
-        tiles = fi.readInput("assets/inputs/hw2input3");
+//        tiles = readInput("assets/inputs/hw2input1");
+        tiles = new int[1][1];
 
         source = new int[2];
         destination = new int[2];
@@ -51,6 +55,8 @@ public class MazeScreen extends BaseScreen {
     Slider speedSlider;
     TextButton searchButton;
     TextButton resetButton;
+    TextButton loadButton;
+    TextField loadText;
     CheckBox selectNodeBox;
     Label costLabel;
 
@@ -66,6 +72,9 @@ public class MazeScreen extends BaseScreen {
         selectNodeBox.setChecked(true);
         costLabel = new Label("", BaseGame.skin);
 
+        loadButton = new TextButton("Load new file...", BaseGame.skin);
+        loadText = new TextField("assets/inputs/hw2input1", BaseGame.skin);
+
         uiTable.top().left().padTop(20).padLeft(10);
         uiTable.add(sourceText, sourceUI);
         uiTable.row();
@@ -76,8 +85,11 @@ public class MazeScreen extends BaseScreen {
         uiTable.add(new Label("Camera Speed :", BaseGame.skin), speedSlider);
         uiTable.row();
         uiTable.add(searchButton, resetButton);
-        uiTable.row().row();
+        uiTable.row();
         uiTable.add(new Label("Cost to Dest: ", BaseGame.skin), costLabel);
+        uiTable.row();
+        uiTable.add(loadText, loadButton);
+
 
         searchButton.addListener(new ChangeListener() {
             @Override
@@ -94,6 +106,18 @@ public class MazeScreen extends BaseScreen {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
                 node = null;
+            }
+        });
+
+        loadButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent changeEvent, Actor actor) {
+                try {
+                    tiles = readInput(loadText.getText());
+                    node = null;
+                } catch (Exception e) {
+
+                }
             }
         });
     }
