@@ -23,9 +23,9 @@ public class SearchAlgorithm {
     }
 
     public static void main(String[] args) {
-        FileInput fs = new FileInput();
-        int[][] map = fs.readInput("assets/inputs/hw2input2");
-//        search(map, 0, 0, 9999, 9999);
+        int[][] map = FileInput.readInput("assets/inputs/input3");
+        Node n = search(map, 0, 0, 9999, 9999);
+        System.out.println(getPath(n));
     }
 
     static int sizeX;

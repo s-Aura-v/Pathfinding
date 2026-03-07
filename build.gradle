@@ -12,6 +12,25 @@ buildscript {
   }
 }
 
+plugins {
+  id("io.github.fourlastor.construo") version "2.1.0"
+}
+
+construo {
+  name.set("Pathfinder")
+  humanName.set("Pathfinder")
+  // Optional, defaults to application.mainClass or jar task main class
+  mainClass.set("lwjgl3.src.main.java.com.aurav.pathfinding.lwjgl3.Lwjgl3Launcher.java")
+  // Optional, defaults to $buildDir/construo/dist
+  // where to put the packaged zips
+  outputDir.set(rootProject.file("dist"))
+  // Optional, an alternative jar task name to base the build upon
+  jarTask.set("Pathfinder")
+  // Optional, a folder to use as the root in the zip output file
+  zipFolder.set("game-v1.0.0")
+}
+
+
 allprojects {
   apply plugin: 'eclipse'
   apply plugin: 'idea'
@@ -27,7 +46,7 @@ allprojects {
 
 configure(subprojects) {
   apply plugin: 'java-library'
-  sourceCompatibility = 21
+  sourceCompatibility = 17
 
   // From https://lyze.dev/2021/04/29/libGDX-Internal-Assets-List/
   // The article can be helpful when using assets.txt in your project.
@@ -69,4 +88,6 @@ subprojects {
   }
 }
 
+
 eclipse.project.name = 'Pathfinding' + '-parent'
+
